@@ -140,7 +140,7 @@ export default function ConcertForm({ concert, prefill, countdownId, concerts, o
         </fieldset>
 
         <fieldset>
-          <legend>New favourite songs</legend>
+          <legend>Favorite songs</legend>
           <SongEditor songs={favSongs} onChange={setFavSongs} defaultArtist={artist} />
         </fieldset>
 

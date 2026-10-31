@@ -78,7 +78,7 @@ export default function ConcertDetail({ concert, concerts, onClose, onEdit, onRe
             </Section>
           )}
           {concert.fav_songs.length > 0 && (
-            <Section title="New favourite songs">
+            <Section title="Favorite songs">
               <SongList songs={concert.fav_songs} />
             </Section>
           )}

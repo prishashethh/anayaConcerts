@@ -8,7 +8,7 @@ export default function Rankings({ concerts, onOpen, onRank }) {
   return (
     <section className="rankings">
       <h2 className="page-title">
-        Ranked <em>favourites</em>
+        Ranked <em>favorites</em>
       </h2>
       {ranked.length === 0 && <p className="muted">Nothing ranked yet. Concerts get ranked when you add them.</p>}
       <ol className="rank-list">

@@ -10,6 +10,13 @@ function topOf(values) {
   return { names: Object.keys(counts).filter((k) => counts[k] === max), count: max }
 }
 
+// Every value with how often it appears, most frequent first.
+function countAll(values) {
+  const counts = {}
+  for (const v of values) counts[v] = (counts[v] || 0) + 1
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+}
+
 export default function Recap({ concerts, onOpen }) {
   const past = concerts.filter((c) => c.date <= todayISO())
   const years = [...new Set(past.map((c) => c.date.slice(0, 4)))].sort().reverse()
@@ -22,10 +29,10 @@ export default function Recap({ concerts, onOpen }) {
     const months = list.map((c) => parseDate(c.date).toLocaleDateString('en-US', { month: 'long' }))
     return {
       list,
-      favourite: ranked[0],
+      favorite: ranked[0],
       artists: new Set(list.map((c) => c.artist)).size,
       topArtist: topOf(list.map((c) => c.artist)),
-      buddy: topOf(list.flatMap((c) => c.companions)),
+      buddies: countAll(list.flatMap((c) => c.companions)),
       venues: new Set(list.map((c) => c.venue).filter(Boolean)).size,
       month: topOf(months),
       newSongs: list.flatMap((c) => c.new_songs),
@@ -35,7 +42,7 @@ export default function Recap({ concerts, onOpen }) {
 
   if (!years.length) return <p className="muted">Your recap appears once you've added a concert.</p>
 
-  const { list, favourite, topArtist, buddy, month } = stats
+  const { list, favorite, topArtist, buddies, month } = stats
 
   return (
     <section className="recap">
@@ -57,26 +64,38 @@ export default function Recap({ concerts, onOpen }) {
       </div>
 
       <div className="recap-grid">
-        {favourite && (
-          <button className="stat glass fav" onClick={() => onOpen(favourite.id)}>
-            {favourite.cover && <img src={favourite.cover.thumbUrl} alt="" />}
+        {favorite && (
+          <button className="stat glass fav" onClick={() => onOpen(favorite.id)}>
+            {favorite.cover && <img src={favorite.cover.thumbUrl} alt="" />}
             <div>
               <p className="eyebrow">Concert of the year</p>
-              <p className="stat-value">{favourite.artist}</p>
-              <p className="muted">{formatDate(favourite.date)}</p>
+              <p className="stat-value">{favorite.artist}</p>
+              <p className="muted">{formatDate(favorite.date)}</p>
             </div>
           </button>
         )}
         {topArtist.count > 1 && (
           <Stat label="Most seen" value={topArtist.names.join(' & ')} sub={`${topArtist.count} times`} />
         )}
-        {buddy.count > 0 && (
-          <Stat label="Concert buddy" value={buddy.names.join(' & ')} sub={`${buddy.count} ${buddy.count === 1 ? 'show' : 'shows'} together`} />
+        {buddies.length > 0 && (
+          <div className="stat glass buddies">
+            <p className="eyebrow">Concert buddies</p>
+            <ol className="buddy-list">
+              {buddies.map(([name, count]) => (
+                <li key={name}>
+                  <span className="buddy-name">{name}</span>
+                  <span className="muted">
+                    {count} {count === 1 ? 'show' : 'shows'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
         )}
         {list.length > 1 && month.count > 1 && (
           <Stat label="Busiest month" value={month.names.join(' & ')} sub={`${month.count} concerts`} />
         )}
-        <Stat label="Songs discovered" value={stats.newSongs.length} sub={`${stats.favSongs.length} new favourites`} />
+        <Stat label="Songs discovered" value={stats.newSongs.length} sub={`${stats.favSongs.length} favorite songs`} />
       </div>
 
       <div className="recap-strip">
@@ -97,7 +116,7 @@ export default function Recap({ concerts, onOpen }) {
           )}
           {stats.favSongs.length > 0 && (
             <div className="glass panel">
-              <h3>New favourites</h3>
+              <h3>Favorite songs</h3>
               <SongList songs={stats.favSongs} />
             </div>
           )}
